@@ -140,6 +140,40 @@ lua_cpath_from_dirs() {
 }
 
 ################################################################
+src_compile_lua_versions() {
+  local LUA_VERSIONS="${1}"
+  local LUA_PKG_NAME="${2}"
+  local LUA_VERSION
+  for LUA_VERSION in ${LUA_VERSIONS//:/ }; do
+    src_compile_lua ${LUA_VERSION} ${LUA_PKG_NAME}
+  done
+}
+
+src_install_lua_versions() {
+  local LUA_VERSIONS="${1}"
+  local LUA_PKG_NAME="${2}"
+  local LUA_VERSION
+  for LUA_VERSION in ${LUA_VERSIONS//:/ }; do
+    src_install_lua ${LUA_VERSION} ${LUA_PKG_NAME}
+  done
+}
+
+src_test_lua_versions() {
+  local LUA_VERSIONS="${1}"
+  local LUA_PKG_NAME="${2}"
+  local LUA_VERSION
+  for LUA_VERSION in ${LUA_VERSIONS//:/ }; do
+    src_test_lua ${LUA_VERSION} ${LUA_PKG_NAME}
+  done
+}
+
+readonly -f \
+  src_compile_lua_versions \
+  src_install_lua_versions \
+  src_test_lua_versions \
+  ;
+
+################################################################
 declare -A LUA_REL_V
 declare -A LUA_BIN_V
 declare -A LUA_INC_V
