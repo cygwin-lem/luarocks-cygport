@@ -155,6 +155,29 @@ lua_cpath_from_dirs() {
 }
 
 ################################################################
+lua_path_test() {
+  local LUA_VERSION="${1}"
+  shift
+  lua_path_from_dirs \
+    "$@" \
+    "${D}${LUA_LMOD_V[${LUA_VERSION}]}" \
+    "${D}${LUA_CMOD_V[${LUA_VERSION}]}" \
+    "${LUA_LMOD_V[${LUA_VERSION}]}" \
+    "${LUA_CMOD_V[${LUA_VERSION}]}" \
+    ;
+}
+
+lua_cpath_test() {
+  local LUA_VERSION="${1}"
+  shift
+  lua_cpath_from_dirs \
+    "$@" \
+    "${D}${LUA_CMOD_V[${LUA_VERSION}]}" \
+    "${LUA_CMOD_V[${LUA_VERSION}]}" \
+    ;
+}
+
+################################################################
 src_compile_lua_versions() {
   local LUA_VERSIONS="${1}"
   local LUA_PKG_NAME="${2}"
