@@ -121,6 +121,21 @@ __alternatives_remove(){
 }
 
 ################################################################
+lua_fix_shebang_version_print() {
+  local LUA_VERSION="$1"
+  local interp="/usr/bin/lua${LUA_VERSION}"
+  local src="$2"
+  local head=$(head -1 "${src}")
+
+  [ x"${head}" = x'#!'"${head#\#\!}" ] \
+  || error "lua_fix_shebang_version_print $1 $2 failed: no shebang"
+
+  printf "%s\n" "${head}" \
+  | sed -e 's;^#![[:space:]]*\(\([^[:space:]]*/\|\)env[[:space:]]*[^[:space:]][^[:space:]]*\|[^[:space:]]*\)\(.*\);#!'"${interp}"'\3;'
+  tail +2 "${src}"
+}
+
+################################################################
 lua_path_from_dirs() {
   local p=
   local f
