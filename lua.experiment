@@ -121,3 +121,22 @@ __alternatives_remove(){
 }
 
 ################################################################
+lua_path_from_dirs() {
+  local p=
+  local f
+  for f in "$@"; do
+    p+="${f%/}/?.lua;${f%/}/?/init.lua;"
+  done
+  printf '%s' "${p%;}"
+}
+
+lua_cpath_from_dirs() {
+  local p=
+  local f
+  for f in "$@"; do
+    p+="${f%/}/?.so;${f%/}/?.dll;"
+  done
+  printf '%s' "${p%;}"
+}
+
+################################################################
