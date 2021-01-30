@@ -42,3 +42,30 @@ cpdirs() {
 }
 
 ################################################################
+__doinsdir () {
+  local src="$1"
+  local dst="$2"
+  local f
+  [ -d "${src}" ] || error "__doinsdir ${src} failed: not a directory"
+  pushd "${src}"
+  for f in $(find . -type d); do
+    insinto "${dst}/$f"
+    doins $(find "$f" -maxdepth 1 -not -type d)
+  done
+  popd
+}
+
+__dodocdir () {
+  local src="$1"
+  local dst="$2"
+  local f
+  [ -d "${src}" ] || error "__dodocdir ${src} failed: not a directory"
+  pushd "${src}"
+  for f in $(find . -type d); do
+    docinto "${dst}/$f"
+    dodoc $(find "$f" -maxdepth 1 -not -type d)
+  done
+  popd
+}
+
+################################################################
