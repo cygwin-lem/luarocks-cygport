@@ -2,6 +2,19 @@
 SRC_URI+=" lua.experiment"
 
 ################################################################
+: ${LUA_VERSIONS:=all}
+LUA_VERSIONS_ALL="5.3:5.4"
+LUA_VERSIONS_LATEST=${LUA_VERSIONS_ALL##*:}
+case ${LUA_VERSIONS} in
+all)
+  LUA_VERSIONS=${LUA_VERSIONS_ALL}
+  ;;
+latest)
+  LUA_VERSIONS=${LUA_VERSIONS_LATEST}
+  ;;
+esac
+
+################################################################
 __str_version_cyg() {
   # Remove a period from a string "x.y" when both x and y are single-digit.
   printf '%s' "$1" | sed -E 's/^([[:digit:]])\.([[:digit:]])$/\1\2/'
