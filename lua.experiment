@@ -2,3 +2,9 @@
 SRC_URI+=" lua.experiment"
 
 ################################################################
+__str_version_cyg() {
+  # Remove a period from a string "x.y" when both x and y are single-digit.
+  printf '%s' "$1" | sed -E 's/^([[:digit:]])\.([[:digit:]])$/\1\2/'
+}
+
+################################################################
