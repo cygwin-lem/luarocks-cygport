@@ -69,3 +69,55 @@ __dodocdir () {
 }
 
 ################################################################
+# __alternatives_install PRIORITY LINK NAME PATH [SLINK SNAME SPATH]*
+__alternatives_install(){
+  local ALT_PRIO=$1
+  shift \
+  || error "__alternatives_install(): needs parameters PRIORITY LINK NAME PATH"
+  local ALT_LINK=$1
+  local ALT_NAME=$2
+  local ALT_PATH=$3
+  shift 3 \
+  || error "__alternatives_install(): needs parameters PRIORITY LINK NAME PATH"
+
+  cat <<- _EOF_
+	/usr/sbin/alternatives \\
+	  --install ${ALT_LINK} \\
+	    ${ALT_NAME} ${ALT_PATH} \\
+	    ${ALT_PRIO} \\
+	_EOF_
+  while [ -n "$1" ]; do
+    ALT_LINK=$1
+    ALT_NAME=$2
+    ALT_PATH=$3
+    shift 3 \
+    || error "__alternatives_install(): needs parameters SLINK SNAME SPATH"
+    cat <<- _EOF_
+	  --slave ${ALT_LINK} \\
+	    ${ALT_NAME} ${ALT_PATH} \\
+	_EOF_
+  done
+  cat <<- _EOF_
+	  ;
+	_EOF_
+}
+
+# __alternatives_remove PRIORITY LINK NAME PATH [SLINK SNAME SPATH]*
+#  (only NAME and PATH are effective, and the rest are ignored)
+__alternatives_remove(){
+  local ALT_PRIO=$1
+  shift || error "__alternatives_remove(): needs parameters PRIORITY LINK NAME PATH"
+  local ALT_LINK=$1
+  local ALT_NAME=$2
+  local ALT_PATH=$3
+  shift 3 || error "__alternatives_remove(): needs parameters PRIORITY LINK NAME PATH"
+
+  cat <<- _EOF_
+	/usr/sbin/alternatives \\
+	  --remove \\
+	    ${ALT_NAME} ${ALT_PATH} \\
+	  ;
+	_EOF_
+}
+
+################################################################
