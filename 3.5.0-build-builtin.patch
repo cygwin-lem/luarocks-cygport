@@ -1,0 +1,36 @@
+--- origsrc/luarocks-3.5.0/src/luarocks/build/builtin.lua	2020-12-11 01:03:20.000000000 +0900
++++ src/luarocks-3.5.0/src/luarocks/build/builtin.lua
+@@ -232,6 +232,33 @@
+          return ok
+       end
+       ]]
++   elseif cfg.is_platform("cygwin") then
++      compile_object = function(object, source, defines, incdirs)
++         local extras = {}
++         add_flags(extras, "-D%s", defines)
++         add_flags(extras, "-I%s", incdirs)
++         return execute(variables.CC.." "..variables.CFLAGS, "-I"..variables.LUA_INCDIR, "-c", source, "-o", object, unpack(extras))
++      end
++      compile_library = function (library, objects, libraries, libdirs)
++         local extras = { unpack(objects) }
++         add_flags(extras, "-L%s", libdirs)
++         if cfg.gcc_rpath then
++            add_flags(extras, "-Wl,-rpath,%s", libdirs)
++         end
++         add_flags(extras, "-l%s", libraries)
++         if cfg.link_lua_explicitly then
++            extras[#extras+1] = "-L"..variables.LUA_LIBDIR
++            extras[#extras+1] = "-llua"..cfg.lua_version
++         end
++         return execute(variables.LD.." "..variables.LIBFLAG, "-o", library, unpack(extras))
++      end
++      compile_static_library = function(library, objects, libraries, libdirs, name)
++         local ok = execute(variables.AR, "rc", library, unpack(objects))
++         if ok then
++            ok = execute(variables.RANLIB, library)
++         end
++         return ok
++      end
+    else
+       compile_object = function(object, source, defines, incdirs)
+          local extras = {}

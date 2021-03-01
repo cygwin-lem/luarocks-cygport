@@ -1,0 +1,183 @@
+NAME="luarocks"
+VERSION=3.5.0
+RELEASE=1
+CATEGORY="Lua"
+SUMMARY="A package manager for Lua modules"
+DESCRIPTION="\
+LuaRocks is the package manager for Lua modules. It allows you to create
+and install Lua modules as self-contained packages called rocks.
+"
+HOMEPAGE="https://luarocks.org/"
+
+GIT_REPO="https://github.com/luarocks/luarocks"
+declare -A GIT_DATEHASH_BY_NAME=(
+  # git log --date=iso-strict --format='%cd/%H' -1
+  [3.5.0p5]=2021-01-13T01:59:41+11:00/007078e85fbf0d9d2e6d4d0390d622654e42ee49
+  [3.5.0]=2020-12-10T13:03:20-03:00/v3.5.0
+)
+REV_HASH="${GIT_DATEHASH_BY_NAME[${VERSION}]#*/}"
+REV_DATE="${GIT_DATEHASH_BY_NAME[${VERSION}]%%/*}"
+REV_DATE_SHORT="${REV_DATE%%T*}"
+GIT_BASENAME="${GIT_REPO##*/}"
+SRC_URI="${GIT_REPO}/archive/${REV_HASH}/${GIT_BASENAME}-${VERSION}.tar.gz"
+SRC_DIR="${GIT_BASENAME}-${REV_HASH#v}"
+
+ARCH="noarch"
+
+################################
+LUA_VERSIONS="5.3:5.4"
+LUA_PKG_NAME="luarocks"
+source lua.experiment
+
+################################
+## Patch files
+################################
+# Patch filenames are in a default style of 'git format-patch'
+PATCH_URI=$(\
+  find -maxdepth 1 -type f -name '[0-9][0-9][0-9][0-9]-*.patch' \
+  | sort \
+)
+# Additional patches, if any
+PATCH_URI+="
+  3.5.0-build-builtin.patch
+  3.5.0-core-cfg.patch
+  3.5.0-core-sysdetect.patch
+  3.5.0-path.patch
+"
+
+################################
+## Requirements for building
+################################
+BUILD_REQUIRES="\
+  pkg-config\
+  lua53-devel\
+  lua54-devel\
+"
+# TEST_REQUIRES="\
+# "
+
+################################
+ABI=0
+
+
+################################
+_CYGPORT_RESTRICT_postinst_doc_=1
+
+set_packages_lua() {
+  local LUA_VERSION=$1
+  local LUA_PKG_NAME=$2
+
+  __add_pkg "lua${LUA_CYG_V[${LUA_VERSION}]}-${LUA_PKG_NAME}"
+  __set_pkg_property . CONTENTS "
+    etc/postinstall/lua${LUA_CYG_V[${LUA_VERSION}]}-${LUA_PKG_NAME}.*
+    etc/preremove/lua${LUA_CYG_V[${LUA_VERSION}]}-${LUA_PKG_NAME}.*
+    etc/luarocks/config-${LUA_VERSION}.lua
+    usr/bin/*-${LUA_VERSION}
+    usr/share/doc/lua${LUA_CYG_V[${LUA_VERSION}]}-*
+    usr/*/lua/${LUA_VERSION}/
+  "
+  __set_pkg_property . REQUIRES "\
+    lua${LUA_CYG_V[${LUA_VERSION}]}-devel\
+    lua${LUA_CYG_V[${LUA_VERSION}]}-socket\
+    lua${LUA_CYG_V[${LUA_VERSION}]}-luasec\
+  "
+  __set_pkg_property . REQUIRES_SUPPRESS "${COMMON_REQUIRES_SUPPRESS}"
+}
+
+set_packages() {
+  local LUA_PKG_NAME=$1
+  local LUA_VERSION
+  COMMON_REQUIRES_SUPPRESS=
+  for LUA_VERSION in ${LUA_VERSIONS//:/ }; do
+    COMMON_REQUIRES_SUPPRESS+=" lua${LUA_CYG_V[${LUA_VERSION}]}-${LUA_PKG_NAME}"
+  done
+
+  for LUA_VERSION in ${LUA_VERSIONS//:/ }; do
+    set_packages_lua ${LUA_VERSION} ${LUA_PKG_NAME}
+  done
+}
+
+set_packages ${LUA_PKG_NAME}
+
+################################
+src_compile_lua() {
+  local LUA_VERSION=$1
+  local LUA_PKG_NAME=$2
+  mkdir -p ${B}/${LUA_VERSION}
+  cd  ${B}/${LUA_VERSION}
+  inform "[Compile] Lua ${LUA_VERSION}: ${LUA_PKG_NAME}"
+
+  cpdirs ${S} .
+  ./configure \
+    --prefix=/usr \
+    --rocks-tree=/usr \
+    --lua-version=${LUA_VERSION} \
+    --with-lua-include=${LUA_INC_V[${LUA_VERSION}]} \
+    --with-lua-lib=${LUA_LIB_V[${LUA_VERSION}]} \
+    --with-lua-interpreter=lua${LUA_VERSION} \
+  ;
+  cygmake
+
+  # echo "local_by_default = true" >> build/config-${LUA_VERSION}.lua
+}
+
+################################
+src_install_lua() {
+  local LUA_VERSION=$1
+  local LUA_PKG_NAME=$2
+  cd ${B}/${LUA_VERSION}
+  inform "[Install] Lua ${LUA_VERSION}: ${LUA_PKG_NAME}"
+
+  cyginstall
+  mv ${D}/usr/bin/luarocks{,-${LUA_VERSION}}
+  mv ${D}/usr/bin/luarocks-admin{,-${LUA_VERSION}}
+
+  docinto /lua${LUA_CYG_V[${LUA_VERSION}]}-${LUA_PKG_NAME}
+  dodoc COPYING* README*
+
+  # postinstall/preremove scripts setting alternatives
+  local -a ALT_PARAMS=( "${LUA_NUM_V[${LUA_VERSION}]}" ) # PRIORITY
+  local POSTINSTALL=./postinstall/lua${LUA_CYG_V[${LUA_VERSION}]}-${LUA_PKG_NAME}.sh
+  local PREREMOVE=./preremove/lua${LUA_CYG_V[${LUA_VERSION}]}-${LUA_PKG_NAME}.sh
+
+  local LINK_NAME=luarocks
+  ALT_PARAMS+=(
+    "/usr/bin/${LINK_NAME}"                     # LINK
+    "${LINK_NAME}"                              # NAME
+    "/usr/bin/${LINK_NAME}-${LUA_VERSION}"      # PATH
+  )
+
+  local LINK_NAME=luarocks-admin
+  ALT_PARAMS+=(
+    "/usr/bin/${LINK_NAME}"                     # SLINK
+    "${LINK_NAME}"                              # SNAME
+    "/usr/bin/${LINK_NAME}-${LUA_VERSION}"      # SPATH
+  )
+
+  mkdir -p ${POSTINSTALL%/*}
+  __alternatives_install "${ALT_PARAMS[@]}" > ${POSTINSTALL}
+  mkdir -p ${PREREMOVE%/*}
+  __alternatives_remove "${ALT_PARAMS[@]}" > ${PREREMOVE}
+
+  insinto /etc/postinstall
+  doins ${POSTINSTALL}
+  insinto /etc/preremove
+  doins ${PREREMOVE}
+}
+
+################################
+src_test_lua() {
+  local LUA_VERSION=$1
+  local LUA_PKG_NAME=$2
+  cd ${B}/${LUA_VERSION}
+  inform "[Test] Lua ${LUA_VERSION}: ${LUA_PKG_NAME}"
+  lua${LUA_VERSION} -v
+
+  cd src
+  echo /usr/bin/luarocks-${LUA_VERSION}
+  ${D}/usr/bin/luarocks-${LUA_VERSION}
+  echo /usr/bin/luarocks-admin-${LUA_VERSION}
+  ${D}/usr/bin/luarocks-admin-${LUA_VERSION}
+}
+
+################################
