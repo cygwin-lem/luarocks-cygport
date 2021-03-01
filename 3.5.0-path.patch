@@ -1,0 +1,11 @@
+--- origsrc/luarocks-3.5.0/src/luarocks/path.lua	2020-12-11 01:03:20.000000000 +0900
++++ src/luarocks-3.5.0/src/luarocks/path.lua
+@@ -41,7 +41,7 @@
+ end
+ 
+ function path.deploy_bin_dir(tree)
+-   return dir.path(path.root_dir(tree), "bin")
++   return dir.path(path.root_dir(tree), "lib/lua/luarocks/bin")
+ end
+ 
+ function path.manifest_file(tree)
