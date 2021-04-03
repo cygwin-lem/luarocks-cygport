@@ -5,7 +5,7 @@
  
  function path.deploy_bin_dir(tree)
 -   return dir.path(path.root_dir(tree), "bin")
-+   return dir.path(path.root_dir(tree), "lib/lua/luarocks/bin")
++   return dir.path(path.root_dir(tree), "lib/lua/luarocks/bin/"..string.gsub(_VERSION,".*%s",""))
  end
  
  function path.manifest_file(tree)
