@@ -1,5 +1,5 @@
 NAME="luarocks"
-VERSION=3.5.0
+VERSION=3.7.0p2
 RELEASE=1
 CATEGORY="Lua"
 SUMMARY="A package manager for Lua modules"
@@ -12,7 +12,9 @@ HOMEPAGE="https://luarocks.org/"
 GIT_REPO="https://github.com/luarocks/luarocks"
 declare -A GIT_DATEHASH_BY_NAME=(
   # git log --date=iso-strict --format='%cd/%H' -1
-  [3.5.0p5]=2021-01-13T01:59:41+11:00/007078e85fbf0d9d2e6d4d0390d622654e42ee49
+  [3.7.0p2]=2021-04-13T20:57:20-03:00/f33aa0125f9d8c94049c162a8fdec54582ade205
+  [3.7.0]=2021-04-13T18:53:35-03:00/v3.7.0
+  [3.6.0]=2021-03-30T15:03:57-03:00/v3.6.0
   [3.5.0]=2020-12-10T13:03:20-03:00/v3.5.0
 )
 REV_HASH="${GIT_DATEHASH_BY_NAME[${VERSION}]#*/}"
@@ -41,7 +43,6 @@ PATCH_URI=$(\
 PATCH_URI+="
   3.5.0-build-builtin.patch
   3.5.0-core-cfg.patch
-  3.5.0-core-sysdetect.patch
   3.5.0-path.patch
 "
 
