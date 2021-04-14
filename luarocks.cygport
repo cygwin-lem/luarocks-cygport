@@ -134,7 +134,7 @@ src_install_lua() {
   mv ${D}/usr/bin/luarocks-admin{,-${LUA_VERSION}}
 
   docinto /lua${LUA_CYG_V[${LUA_VERSION}]}-${LUA_PKG_NAME}
-  dodoc COPYING* README*
+  dodoc COPYING* README* CHANGELOG*
 
   # postinstall/preremove scripts setting alternatives
   local -a ALT_PARAMS=( "${LUA_NUM_V[${LUA_VERSION}]}" ) # PRIORITY
