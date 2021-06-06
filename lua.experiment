@@ -296,6 +296,7 @@ __set_variables_lua () {
   LUAC=${LUA_BIN_V[${v}]}/luac${v}
   LUA_VERSION=${v}
   LUA_VERSION_NUM=${LUA_NUM_V[${v}]}
+  LUA_VERSION_CYG=${LUA_CYG_V[${v}]}
   LUA_INCLUDEDIR=${LUA_INC_V[${v}]}
   LUA_LIBDIR=${LUA_CMOD_V[${v}]}
   LUA_SCRIPTDIR=${LUA_LMOD_V[${v}]}
