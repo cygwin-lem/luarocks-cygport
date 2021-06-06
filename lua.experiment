@@ -289,6 +289,21 @@ __lua_config_variables() {
 }
 
 ################################################################
+# Setting variables for specified Lua version in accordance with lua.cygclass
+__set_variables_lua () {
+  local v=$1
+  LUA=${LUA_BIN_V[${v}]}/lua${v}
+  LUAC=${LUA_BIN_V[${v}]}/luac${v}
+  LUA_VERSION=${v}
+  LUA_VERSION_NUM=${LUA_NUM_V[${v}]}
+  LUA_INCLUDEDIR=${LUA_INC_V[${v}]}
+  LUA_LIBDIR=${LUA_CMOD_V[${v}]}
+  LUA_SCRIPTDIR=${LUA_LMOD_V[${v}]}
+  LUA_CFLAGS=${LUA_CFLAGS_V[${v}]}
+  LUA_LIBS=${LUA_LIBS_V[${v}]}
+}
+
+################################################################
 # A workaround scirpt in case CYGWIN variable has 'winsymlinks:nativestrict'
 __script_for_working_around_winsymlinks_nativestrict () {
   cat <<'_EOF'
