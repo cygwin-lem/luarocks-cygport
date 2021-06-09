@@ -139,31 +139,20 @@ src_install_lua() {
   mv ${D}/usr/bin/luarocks-admin{,-${LUA_VERSION}}
 
   docinto /lua${LUA_VERSION_CYG}-${LUA_PKG_NAME}
-  dodoc COPYING* README* CHANGELOG*
+  dodoc COPYING *.md *.rockspec
 
   # postinstall/preremove scripts setting alternatives
-  local -a ALT_PARAMS=( "${LUA_VERSION_NUM}" ) # PRIORITY
   local POSTINSTALL=./postinstall/lua${LUA_VERSION_CYG}-${LUA_PKG_NAME}.sh
   local PREREMOVE=./preremove/lua${LUA_VERSION_CYG}-${LUA_PKG_NAME}.sh
 
-  local LINK_NAME=luarocks
-  ALT_PARAMS+=(
-    "/usr/bin/${LINK_NAME}"                     # LINK
-    "${LINK_NAME}"                              # NAME
-    "/usr/bin/${LINK_NAME}-${LUA_VERSION}"      # PATH
-  )
+  mkdir -p ./postinstall
+  mkdir -p ./preremove
 
-  local LINK_NAME=luarocks-admin
-  ALT_PARAMS+=(
-    "/usr/bin/${LINK_NAME}"                     # SLINK
-    "${LINK_NAME}"                              # SNAME
-    "/usr/bin/${LINK_NAME}-${LUA_VERSION}"      # SPATH
-  )
-
-  mkdir -p ${POSTINSTALL%/*}
-  __alternatives_install "${ALT_PARAMS[@]}" > ${POSTINSTALL}
-  mkdir -p ${PREREMOVE%/*}
-  __alternatives_remove "${ALT_PARAMS[@]}" > ${PREREMOVE}
+  __script_postinstall_lua ${LUA_VERSION} ${LUA_PKG_NAME} <<_EOF > ${POSTINSTALL}
+--slave /usr/bin/luarocks luarocks-admin /usr/bin/luarocks-\${LUA_VERSION} \\
+--slave /usr/bin/luarocks-admin luarocks-admin lua2json /usr/bin/luarocks-admin-\${LUA_VERSION} \\
+_EOF
+  __script_preremove_lua ${LUA_VERSION} ${LUA_PKG_NAME} > ${PREREMOVE}
 
   insinto /etc/postinstall
   doins ${POSTINSTALL}
