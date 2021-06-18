@@ -196,6 +196,8 @@ src_compile_lua_versions() {
   local LUA_PKG_NAME="${2}"
   local LUA_VERSION
   for LUA_VERSION in ${LUA_VERSIONS//:/ }; do
+    __set_variables_lua ${LUA_VERSION}
+    inform "[Compile] Lua ${LUA_VERSION}: ${LUA_PKG_NAME}"
     src_compile_lua ${LUA_VERSION} ${LUA_PKG_NAME}
   done
 }
@@ -205,6 +207,9 @@ src_install_lua_versions() {
   local LUA_PKG_NAME="${2}"
   local LUA_VERSION
   for LUA_VERSION in ${LUA_VERSIONS//:/ }; do
+    __set_variables_lua ${LUA_VERSION}
+    inform "[Install] Lua ${LUA_VERSION}: ${LUA_PKG_NAME}"
+    docinto /lua${LUA_VERSION_CYG}-${LUA_PKG_NAME}
     src_install_lua ${LUA_VERSION} ${LUA_PKG_NAME}
   done
 }
@@ -214,6 +219,9 @@ src_test_lua_versions() {
   local LUA_PKG_NAME="${2}"
   local LUA_VERSION
   for LUA_VERSION in ${LUA_VERSIONS//:/ }; do
+    __set_variables_lua ${LUA_VERSION}
+    inform "[Test] Lua ${LUA_VERSION}: ${LUA_PKG_NAME}"
+    ${LUA} -v
     src_test_lua ${LUA_VERSION} ${LUA_PKG_NAME}
   done
 }
