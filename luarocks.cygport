@@ -27,7 +27,7 @@ SRC_DIR="${GIT_BASENAME}-${REV_HASH#v}"
 ARCH="noarch"
 
 ################################
-LUA_VERSIONS="5.3:5.4"
+LUA_VERSIONS="5.1:5.2:5.3:5.4"
 LUA_PKG_NAME="luarocks"
 source lua.experiment
 
@@ -50,6 +50,8 @@ PATCH_URI+="
 ## Requirements for building
 ################################
 BUILD_REQUIRES="\
+  lua51-devel lua51-luasec lua51-luasec lua51-socket\
+  lua52-devel lua52-luasec lua52-luasec lua52-socket\
   lua53-devel lua53-luasec lua53-luasec lua53-socket\
   lua54-devel lua54-luasec lua54-luasec lua54-socket\
 "
