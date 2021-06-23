@@ -50,9 +50,8 @@ PATCH_URI+="
 ## Requirements for building
 ################################
 BUILD_REQUIRES="\
-  pkg-config\
-  lua53-devel\
-  lua54-devel\
+  lua53-devel lua53-luasec lua53-luasec lua53-socket\
+  lua54-devel lua54-luasec lua54-luasec lua54-socket\
 "
 # TEST_REQUIRES="\
 # "
@@ -65,52 +64,26 @@ ABI=0
 _CYGPORT_RESTRICT_postinst_doc_=1
 
 set_packages_lua() {
-  local LUA_VERSION=$1
-  local LUA_PKG_NAME=$2
-  __set_variables_lua ${LUA_VERSION}
-
   __add_pkg "lua${LUA_VERSION_CYG}-${LUA_PKG_NAME}"
   __set_pkg_property . CONTENTS "
-    etc/postinstall/lua${LUA_VERSION_CYG}-${LUA_PKG_NAME}.*
-    etc/preremove/lua${LUA_VERSION_CYG}-${LUA_PKG_NAME}.*
-    etc/luarocks/config-${LUA_VERSION}.lua
-    usr/bin/*-${LUA_VERSION}
     usr/share/doc/lua${LUA_VERSION_CYG}-*
     usr/*/lua/${LUA_VERSION}/
   "
-  __set_pkg_property . REQUIRES "\
-    lua${LUA_VERSION_CYG}-devel\
-    lua${LUA_VERSION_CYG}-socket\
-    lua${LUA_VERSION_CYG}-luasec\
+  __set_pkg_property . REQUIRES "lua${LUA_VERSION_CYG}-devel"
+
+  __append_pkg_property . CONTENTS "
+    usr/bin/*-${LUA_VERSION}
+    etc/p*/lua${LUA_VERSION_CYG}-${LUA_PKG_NAME}.sh
+    etc/luarocks/config-${LUA_VERSION}.lua
   "
-  __set_pkg_property . REQUIRES_SUPPRESS "${COMMON_REQUIRES_SUPPRESS}"
 }
 
-set_packages() {
-  local LUA_PKG_NAME=$1
-  local LUA_VERSION
-  COMMON_REQUIRES_SUPPRESS=
-  for LUA_VERSION in ${LUA_VERSIONS//:/ }; do
-    __set_variables_lua ${LUA_VERSION}
-    COMMON_REQUIRES_SUPPRESS+=" lua${LUA_VERSION_CYG}-${LUA_PKG_NAME}"
-  done
-
-  for LUA_VERSION in ${LUA_VERSIONS//:/ }; do
-    set_packages_lua ${LUA_VERSION} ${LUA_PKG_NAME}
-  done
-}
-
-set_packages ${LUA_PKG_NAME}
+set_packages_lua_versions ${LUA_VERSIONS} ${LUA_PKG_NAME}
 
 ################################
 src_compile_lua() {
-  local LUA_VERSION=$1
-  local LUA_PKG_NAME=$2
-  __set_variables_lua ${LUA_VERSION}
-
   mkdir -p ${B}/${LUA_VERSION}
   cd  ${B}/${LUA_VERSION}
-  inform "[Compile] Lua ${LUA_VERSION}: ${LUA_PKG_NAME}"
 
   cpdirs ${S} .
   ./configure \
@@ -127,18 +100,12 @@ src_compile_lua() {
 
 ################################
 src_install_lua() {
-  local LUA_VERSION=$1
-  local LUA_PKG_NAME=$2
-  __set_variables_lua ${LUA_VERSION}
-
   cd ${B}/${LUA_VERSION}
-  inform "[Install] Lua ${LUA_VERSION}: ${LUA_PKG_NAME}"
 
   cyginstall
   mv ${D}/usr/bin/luarocks{,-${LUA_VERSION}}
   mv ${D}/usr/bin/luarocks-admin{,-${LUA_VERSION}}
 
-  docinto /lua${LUA_VERSION_CYG}-${LUA_PKG_NAME}
   dodoc COPYING *.md *.rockspec
 
   # postinstall/preremove scripts setting alternatives
@@ -162,13 +129,7 @@ _EOF
 
 ################################
 src_test_lua() {
-  local LUA_VERSION=$1
-  local LUA_PKG_NAME=$2
-  __set_variables_lua ${LUA_VERSION}
-
   cd ${B}/${LUA_VERSION}
-  inform "[Test] Lua ${LUA_VERSION}: ${LUA_PKG_NAME}"
-  lua${LUA_VERSION} -v
 
   cd src
   echo /usr/bin/luarocks-${LUA_VERSION}
