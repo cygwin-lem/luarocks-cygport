@@ -1,5 +1,5 @@
 category: Lua
-requires: bash lua54 lua54-socket lua54-devel
+requires: bash lua54 lua54-devel lua54-socket
 sdesc: "A package manager for Lua modules"
 ldesc: "LuaRocks is the package manager for Lua modules. It allows you to create
 and install Lua modules as self-contained packages called rocks.
